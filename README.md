@@ -37,8 +37,10 @@ This tool contains two implementations of the same model:
 - Code Used: [Source Code](interactive/index.html)
 
 ## Model overview and flow chart
-The model is defined in:
-- https://miro.com/app/live-embed/uXjVG9_VLcw=/?embedMode=view_only_without_ui&moveToViewport=-372%2C-86%2C1203%2C544&embedId=144339276103 
+The model is defined:
+<a href="https://miro.com/app/live-embed/uXjVG9_VLcw=/?embedMode=view_only_without_ui&moveToViewport=-372%2C-86%2C1203%2C544&embedId=144339276103" target="_blank">
+View Miro Diagram
+</a>
 
 Core structure:
 - Baseline sky brightness ratio at CSU IM Fields: **R0 = 35× natural**
