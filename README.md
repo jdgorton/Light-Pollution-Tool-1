@@ -20,7 +20,7 @@ This tool contains two implementations of the same model:
 
 2) **Interactive tool (Gemini-built)**
 - A more interactive version generated with Gemini and then adjusted to match the same model.
-- Files: `interactive/` (see folder for instructions and prompts)
+- Files: `interactive/index.html` (see folder for instructions and prompts)
 
 ## Model overview (single source of truth)
 The model is defined in:
