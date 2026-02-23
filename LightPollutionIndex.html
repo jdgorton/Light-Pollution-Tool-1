@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSU Light Pollution Estimator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --sky-dark: #0a0e14;
+            --csu-gold: #c8c372;
+            --csu-green: #1e4d2b;
+        }
+        body {
+            background-color: var(--sky-dark);
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        input[type=range] {
+            accent-color: var(--csu-gold);
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-[#c8c372] mb-2">CSU Light Pollution Estimator</h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">
+                Modeling the transition from campus skyglow to Poudre Canyon dark skies.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Controls Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h2 class="text-xl font-semibold mb-6 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                        Model Inputs
+                    </h2>
+
+                    <!-- ULI -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2 flex justify-between">
+                            Upward Light Index (ULI)
+                            <span id="uliVal" class="text-[#c8c372] font-mono">1.0x</span>
+                        </label>
+                        <input type="range" id="uli" min="0.1" max="2.0" step="0.1" value="1.0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-500 mt-1">Impact of fixture shielding and intensity.</p>
+                    </div>
+
+                    <!-- Distance -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2 flex justify-between">
+                            Distance from Campus
+                            <span id="distVal" class="text-[#c8c372] font-mono">0.5 km</span>
+                        </label>
+                        <input type="range" id="distance" min="0.1" max="50" step="0.1" value="0.5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-gray-500 mt-1">Movement toward the Poudre Canyon.</p>
+                    </div>
+
+                    <!-- Atmospheric Condition -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Atmospheric Condition</label>
+                        <select id="skyCondition" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-[#c8c372] outline-none">
+                            <option value="1.0">Very Clear (Dry)</option>
+                            <option value="1.5">Typical Front Range</option>
+                            <option value="3.0">Hazy / Light Mist</option>
+                            <option value="8.0">Overcast (Max Scattering)</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Clouds amplify skyglow via scattering.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl text-xs text-gray-400 leading-relaxed">
+                    <h3 class="font-bold text-gray-300 uppercase mb-2">Model Calibration</h3>
+                    <p>Baseline ($R_0$): 35× natural sky at Intramural Fields (0.5km center-to-source).</p>
+                    <p class="mt-2">Natural Sky: ~21.7 mag/arcsec²</p>
+                    <p class="mt-2">Decay: Power-law function simulating light transport through the lower atmosphere.</p>
+                </div>
+            </div>
+
+            <!-- Visualization & Results -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Visual Sky Preview -->
+                <div id="skyPreview" class="relative w-full h-64 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl transition-colors duration-700">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div id="glowLayer" class="absolute inset-0 bg-orange-400 opacity-0 transition-opacity duration-700"></div>
+                        <div id="starContainer" class="absolute inset-0"></div>
+                        <div class="z-10 text-center">
+                            <div id="skyDescription" class="text-2xl font-bold drop-shadow-md">Clear Sky</div>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-4 text-[10px] uppercase tracking-widest text-gray-500">Visual Simulation</div>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="glass-panel p-4 rounded-xl text-center">
+                        <div class="text-xs text-gray-400 mb-1 uppercase">Sky Brightness</div>
+                        <div id="ratioOut" class="text-xl font-bold text-white">--</div>
+                        <div class="text-[10px] text-gray-500">Relative to Natural</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl text-center">
+                        <div class="text-xs text-gray-400 mb-1 uppercase">Magnitude</div>
+                        <div id="magOut" class="text-xl font-bold text-white">--</div>
+                        <div class="text-[10px] text-gray-500">mag/arcsec²</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl text-center">
+                        <div class="text-xs text-gray-400 mb-1 uppercase">NELM</div>
+                        <div id="nelmOut" class="text-xl font-bold text-white">--</div>
+                        <div class="text-[10px] text-gray-500">Naked-Eye Limit</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl text-center">
+                        <div class="text-xs text-gray-400 mb-1 uppercase">Visible Stars</div>
+                        <div id="starCountOut" class="text-xl font-bold text-white">--</div>
+                        <div class="text-[10px] text-gray-500">Estimated Count</div>
+                    </div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="glass-panel p-6 rounded-2xl">
+                    <h3 class="text-lg font-semibold mb-4">How to interpret these results</h3>
+                    <div class="space-y-4 text-sm text-gray-300">
+                        <p>
+                            <strong class="text-[#c8c372]">Upward Light Index (ULI):</strong> Reducing this mimics transitioning to 100% full-cutoff LED fixtures. Even at the same distance, lower ULI prevents light from entering the transport path.
+                        </p>
+                        <p>
+                            <strong class="text-[#c8c372]">Distance Decay:</strong> As you move away from CSU toward the Poudre Canyon, the "dome" of light decreases. However, on overcast nights, this dome can be seen from much further away due to cloud reflection.
+                        </p>
+                        <p>
+                            <strong class="text-[#c8c372]">Bortle Scale Approximation:</strong> 
+                            <span id="bortleClass" class="px-2 py-0.5 rounded bg-[#1e4d2b] text-white text-xs">Class --</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants & Baseline Calibration
+        const NATURAL_SKY_BRIGHTNESS = 1.0; // Normalized unit
+        const NATURAL_MAG = 21.7; // mag/arcsec^2
+        const R0 = 35.0; // Calibrated ratio at intramural fields
+        const D0 = 0.5;  // Distance of calibration point (km)
+        const DECAY_CONSTANT = 1.8; // Power law exponent for atmospheric dissipation
+
+        // DOM Elements
+        const uliInput = document.getElementById('uli');
+        const distInput = document.getElementById('distance');
+        const conditionInput = document.getElementById('skyCondition');
+        
+        const uliVal = document.getElementById('uliVal');
+        const distVal = document.getElementById('distVal');
+        
+        const ratioOut = document.getElementById('ratioOut');
+        const magOut = document.getElementById('magOut');
+        const nelmOut = document.getElementById('nelmOut');
+        const starCountOut = document.getElementById('starCountOut');
+        
+        const skyPreview = document.getElementById('skyPreview');
+        const glowLayer = document.getElementById('glowLayer');
+        const starContainer = document.getElementById('starContainer');
+        const skyDesc = document.getElementById('skyDescription');
+        const bortleBadge = document.getElementById('bortleClass');
+
+        // Initialize Stars
+        function initStars() {
+            starContainer.innerHTML = '';
+            for (let i = 0; i < 1500; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const size = Math.random() * 1.5 + 0.5;
+                const mag = Math.random() * 7; // Intrinsic star brightness 0 to 7
+                
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.dataset.mag = mag; // Store magnitude
+                
+                starContainer.appendChild(star);
+            }
+        }
+
+        function calculate() {
+            const uli = parseFloat(uliInput.value);
+            const dist = parseFloat(distInput.value);
+            const atmosphere = parseFloat(conditionInput.value);
+
+            // 1. Calculate Artificial Contribution
+            // Decay function: R = R0 * (D0 / Dist)^decay
+            // Adjusted by ULI and Atmosphere
+            let artificialRatio = R0 * Math.pow(D0 / dist, DECAY_CONSTANT);
+            artificialRatio *= uli;
+            artificialRatio *= atmosphere;
+
+            // 2. Combine with Natural Baseline
+            const totalRatio = NATURAL_SKY_BRIGHTNESS + artificialRatio;
+
+            // 3. Convert to Magnitude (mag/arcsec^2)
+            // Mag = Natural_Mag - 2.5 * log10(Total_Ratio)
+            const currentMag = NATURAL_MAG - 2.5 * Math.log10(totalRatio);
+
+            // 4. Calculate NELM (Naked Eye Limiting Magnitude)
+            // Simplified approximation: NELM = (Mag - 14.2) / 1.2
+            // Adjusted for human observer limits
+            let nelm = (currentMag - 12.0) / 1.6;
+            if (nelm > 6.5) nelm = 6.5; // Cap at perfect human vision
+            if (nelm < 0) nelm = 0;
+
+            // 5. Estimated Star Count
+            // N = 5 * 10^(0.5 * NELM) - approximate distribution
+            const starCount = Math.round(5 * Math.pow(10, 0.45 * nelm));
+
+            updateUI(uli, dist, totalRatio, currentMag, nelm, starCount, atmosphere);
+        }
+
+        function updateUI(uli, dist, ratio, mag, nelm, stars, atmosphere) {
+            uliVal.textContent = uli.toFixed(1) + 'x';
+            distVal.textContent = dist.toFixed(1) + ' km';
+            
+            ratioOut.textContent = ratio.toFixed(1) + 'x';
+            magOut.textContent = mag.toFixed(2);
+            nelmOut.textContent = nelm.toFixed(1);
+            starCountOut.textContent = stars.toLocaleString();
+
+            // Update Visuals
+            const normalizedGlow = Math.min(ratio / 40, 1);
+            glowLayer.style.opacity = normalizedGlow * 0.8;
+            
+            // Background color shift based on brightness
+            const skyHue = 210; // Dark blue
+            const skySat = Math.max(10, 50 - ratio);
+            const skyLight = Math.min(25, 2 + (ratio / 2));
+            skyPreview.style.backgroundColor = `hsl(${skyHue}, ${skySat}%, ${skyLight}%)`;
+
+            // Update visible stars
+            const allStars = document.querySelectorAll('.star');
+            allStars.forEach(s => {
+                const sMag = parseFloat(s.dataset.mag);
+                if (sMag <= nelm) {
+                    s.style.opacity = (1 - (sMag / (nelm + 0.1))).toString();
+                } else {
+                    s.style.opacity = '0';
+                }
+            });
+
+            // Bortle and Description
+            let bClass = "9";
+            let desc = "Inner-City Sky";
+            if (mag > 21.5) { bClass = "1"; desc = "Excellent Dark Sky"; }
+            else if (mag > 21.0) { bClass = "2"; desc = "Typical Dark Sky"; }
+            else if (mag > 20.2) { bClass = "3"; desc = "Rural Sky"; }
+            else if (mag > 19.5) { bClass = "4"; desc = "Rural/Suburban Transition"; }
+            else if (mag > 18.8) { bClass = "5"; desc = "Suburban Sky"; }
+            else if (mag > 18.2) { bClass = "6"; desc = "Bright Suburban Sky"; }
+            else if (mag > 17.5) { bClass = "7"; desc = "Suburban/Urban Transition"; }
+            else if (mag > 16.5) { bClass = "8"; desc = "City Sky"; }
+
+            if (atmosphere > 5) desc = "Overcast (Reflected Glow)";
+            
+            skyDesc.textContent = desc;
+            bortleBadge.textContent = `Bortle Class ${bClass}`;
+            
+            // Visual feedback for overcast
+            if (atmosphere > 5) {
+                skyPreview.style.filter = "blur(1px)";
+            } else {
+                skyPreview.style.filter = "none";
+            }
+        }
+
+        // Listeners
+        uliInput.addEventListener('input', calculate);
+        distInput.addEventListener('input', calculate);
+        conditionInput.addEventListener('change', calculate);
+
+        window.onload = () => {
+            initStars();
+            calculate();
+        };
+    </script>
+</body>
+</html>
