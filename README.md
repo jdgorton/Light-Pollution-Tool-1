@@ -16,7 +16,7 @@ This tool contains two implementations of the same model:
 
 1) **Excel tool (baseline)**
 - Interactive inputs (ULI, distance, sky condition) and a distance curve + chart.
-- File: [excel/Tool1_LightPollution_CSU.xlsx](https://colostate-my.sharepoint.com/:x:/g/personal/jdgorton_colostate_edu/IQAeIv9CEOUfQY4V9l-XCt2xAYjqg8lSoMRwQAyzyRlyOFA?e=6M7MaA)
+- File: [excel/Tool1_LightPollution_CSU.xlsx](https://colostate-my.sharepoint.com/:x:/g/personal/jdgorton_colostate_edu/IQAeIv9CEOUfQY4V9l-XCt2xAWuh6IyVs-rJa86wepqh9x8?e=BOpVbT)
 
 2) **Interactive tool (Gemini-built)**
 - A more interactive version generated with Gemini and then adjusted to match the same model.
