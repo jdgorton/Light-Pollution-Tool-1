@@ -20,7 +20,7 @@ This tool contains two implementations of the same model:
 
 2) **Interactive tool (Gemini-built)**
 - A more interactive version generated with Gemini and then adjusted to match the same model.
-- Files:  [Live Interactive Tool](https://yourusername.github.io/tool1-light-pollution/interactive/) [Source Code](interactive/index.html)
+- Files:  [Live Interactive Tool](https://jdgorton.github.io/tool1-light-pollution/interactive/) [Source Code](interactive/index.html)
 
 ## Model overview (single source of truth)
 The model is defined in:
