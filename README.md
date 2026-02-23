@@ -20,12 +20,12 @@ This tool contains two implementations of the same model:
 
 2) **Interactive tool (Gemini-built)**
 - A more interactive version generated with Gemini and then adjusted to match the same model.
-- Files:  [Live Interactive Tool](https://jdgorton.github.io/Light-Pollution-Tool-1/interactive/) [Source Code](interactive/index.html)
+- Files:  [Live Interactive Tool](https://jdgorton.github.io/Light-Pollution-Tool-1/interactive/)
+- Code Used: [Source Code](interactive/index.html)
 
-## Model overview (single source of truth)
+## Model overview and flow chart
 The model is defined in:
-- `model/model_spec.md` (variables + equations)
-- `model/constants.md` (default parameters)
+- https://miro.com/app/board/uXjVG9_VLcw=/?share_link_id=34125181859 
 
 Core structure:
 - Baseline sky brightness ratio at CSU IM Fields: **R0 = 35× natural**
@@ -35,19 +35,17 @@ Core structure:
 - Total brightness ratio: **R_total(d) = 1 + (R0 − 1)·ULI·g(S)·f(d)**  
 - Convert to μ(d), then to NELM and star estimate.
 
-## Comparison approach (Excel vs Gemini)
-To verify both implementations match, I use the same inputs in both tools and compare outputs for a small set of test cases:
-- `model/test_cases.csv`
-- `comparison/comparison_table.md`
-
 ## How to use
 ### Excel
 1. Open `excel/Tool1_LightPollution_CSU.xlsx`
-2. Adjust inputs on the `Tool` sheet (ULI, distance, sky condition)
-3. View the distance curve and chart on the `Curve` sheet
+2. May have to open / make a copy on the desktop version
+3. Adjust inputs on the `Tool` sheet (ULI, distance, sky condition)
+4. View the distance curve and chart on the `Curve` sheet
 
 ### Gemini interactive tool
-See: `interactive/usage_instructions.md`
+1. Open
+2. Adjust imputs using the sliders
+3. View the start count on the simulated sky
 
 ## Assumptions + limitations
 - CSU is treated as a single source region (Intramural Fields baseline anchors the model).
