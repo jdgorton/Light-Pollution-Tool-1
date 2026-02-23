@@ -1,9 +1,22 @@
 # Light Polution: Tool 1
 This project is a small exposure-reasoning tool that estimates how outdoor lighting on CSU’s campus contributes to sky brightness and star visibility as you travel away from campus, particularly in the Cache la Poudre Canyon direction. The tool is intended for order-of-magnitude reasoning and scenario comparison (e.g., “what if lighting is reduced by 30%?” or “what if it’s cloudy?”), not precise photometric prediction.
 
-## Scenario + Engineering Question
-On clear nights, the night sky above CSU’s Intramural Fields appears hazier and shows fewer stars than the night sky along the Cache la Poudre River.  
-**Engineering question:** If CSU reduced outdoor lighting by X%, how much would the sky brightness change on campus? Would any change affect visibility at my Poudre River spot?
+**Direct Observations**
+- On a clear, cloudless, night, the night sky on the CSU Intramural Fields looks hazy compared to the night sky along the Cache la Poudre River. 
+- There are significantly few stars visible on the CSU Intramural Fields than along the Cache la Poudre River.
+
+**Inferences**
+1. Campus lighting is scattering in the atmosphere, especially off aerosols and/or humidity, creating skyglow that reduces night-sky visibility.
+2. Cloud cover amplifies skyglow by reflecting and scattering artificial light back downward, making the sky brighter than on clear nights.
+3. Some fixtures may emit more light upward or sideways than intended, increasing the amount of light that reaches the sky.
+4. A high density of light sources in a small area likely increases local sky brightness compared to areas with fewer fixtures.
+5. Some areas may be over lit with a higher wattage.
+
+**Engineering question**
+- If CSU reduced outdoor lighting by X%, how much would the sky brightness change on campus? Would any change effect visibility at my Poudre River spot?
+
+**Explicit unknown**
+- I don’t know the true upward light output from CSU (direct uplight + reflected light), and I don’t know exactly how fast skyglow decays with distance.
 
 ## What the tool outputs
 Given user inputs, the model estimates:
@@ -45,13 +58,16 @@ Core structure:
 ### Gemini interactive tool
 1. Open
 2. Adjust imputs using the sliders
-3. View the start count on the simulated sky
+3. View the star count on the simulated sky
+4. Read `How to interpert these results`
 
 ## Assumptions + limitations
 - CSU is treated as a single source region (Intramural Fields baseline anchors the model).
 - Atmospheric effects are represented with a coarse multiplier (clear → overcast).
 - Terrain shielding, line-of-sight effects, and local lighting sources along the route are not modeled.
 - The star-count estimate is intentionally rough and should be interpreted qualitatively.
+- Uniform atmospheric scattering
+- Power-law distance decay
 
 ## Coordinates used
 - CSU Intramural Fields (source): (40.573661, -105.093134)
