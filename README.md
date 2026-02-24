@@ -1,4 +1,4 @@
-# Light Polution: Tool 1
+# Light Polution: Tool 1 Overview
 This project is a small exposure-reasoning tool that estimates how outdoor lighting on CSU’s campus contributes to sky brightness and star visibility as you travel away from campus, particularly in the Cache la Poudre Canyon direction. The tool is intended for order-of-magnitude reasoning and scenario comparison (e.g., “what if lighting is reduced by 30%?” or “what if it’s cloudy?”), not precise photometric prediction.
 
 **Direct Observations**
@@ -74,3 +74,17 @@ Core structure:
 ## Coordinates used
 - CSU Intramural Fields (source): (40.573661, -105.093134)
 - Poudre River spot (observer): (40.697135, -105.254757)
+
+## Reflection
+For Tool 1, I approached the assignment experimentally by building two implementations of the same model. One of them was an Excel-based baseline and the other wasva more interactive HTML tool generated with Gemini 3 and deployed through GitHub Pages. Excel helped me understand the internal structure of the system before introducing complexity. Although the spreadsheet became messy during iterations, it forced me to manually implement and verify each equation, which clarified how the brightness ratio, distance decay, and visibility conversions were interacting. That process made the underlying mechanics of the model much more transparent before moving to a more polished interface.
+
+The assumption that mattered most in this tool was the baseline brightness ratio at the Intramural Fields (R₀ = 35× natural sky brightness). Every downstream prediction, such asthe distance decay, sky brightness in mag/arcsec², NELM, and star visibility, scales from that calibration point. Since I could not realistically calculate the total upward lumens from CSU, I anchored the system to an observed condition instead. I determined this assumption was critical by observing how sensitive the outputs were when R₀ changed even slightly; small adjustments significantly altered predicted visibility.
+
+The model breaks down when interpreted as a precise photometric simulation. It simplifies CSU as a single source, treats atmospheric effects with coarse multipliers, and does not account for terrain shielding or additional light sources along the route. The star estimation, especially, can give false confidence if interpreted literally, since it compresses complex visual perception into a single formula.
+
+AI was most helpful in structuring the equations cleanly, translating the model into an interactive HTML tool, debugging logical errors, and explaining important concepts. However, I had to intervene frequently to verify assumptions, correct unit consistency, and recalibrate constants to maintain physical realism. I found that debugging was much harder when I did not fully understand the equations, which reinforced that AI can accelerate implementation but cannot replace conceptual understanding.
+
+## Important Resource
+<a href="https://source.colostate.edu/wp-content/uploads/2016/01/CSU-Sports-Lighting-Environmental-Impact.pdf " target="_blank">
+Stadium Lighting and General Lighting Table
+</a>
